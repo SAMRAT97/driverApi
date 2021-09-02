@@ -5,14 +5,16 @@ import java.util.Optional;
 import java.util.UUID;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.data.repository.NoRepositoryBean;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.RequestParam;
 
 import com.driver.Exception.EntityNotFoundException;
 import com.driver.constantMessages.Constants;
-import com.driver.dao.DriverRepository;
+import com.driver.dao.DriverRepositoryES;
 import com.driver.entities.Driver;
 import com.driver.model.DriverRequest;
 import com.driver.model.DriverResponse;
@@ -23,14 +25,17 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 public class DriverServiceImpl implements DriverService {
 
+	
+	//DriverRepository driverRepository;
 	@Autowired
-	DriverRepository driverRepository;
+	DriverRepositoryES driverRepositoryES;
 
 	@Override
 	@Transactional(readOnly = true, rollbackFor = Exception.class)
+	@Qualifier
 	public Driver getDriverById(String driverId) {
 
-		Optional<Driver> d = (driverRepository.findById(driverId));
+		Optional<Driver> d = (driverRepositoryES.findById(driverId));
 
 		if (d.isEmpty()) {
 			EntityNotFoundException ex = new EntityNotFoundException(Driver.class, "driverId", driverId.toString());
@@ -59,7 +64,7 @@ public class DriverServiceImpl implements DriverService {
 		if (driverRequest.getTruckId() != null) {
 			d.setTruckId(driverRequest.getTruckId());
 		}
-		driverRepository.save(d);
+		driverRepositoryES.save(d);
 		log.info("Driver Data is saved");
 		driverResponse.setDriverId(driverid);
 		driverResponse.setStatus(Constants.driverAdded);
@@ -78,7 +83,7 @@ public class DriverServiceImpl implements DriverService {
 	public DriverResponse updateDriver(String driverId, DriverRequest driverRequest) {
 		DriverResponse driverResponse = new DriverResponse();
 
-		Driver d = driverRepository.findById(driverId).orElse(null);
+		Driver d = driverRepositoryES.findById(driverId).orElse(null);
 
 		if (d == null) {
 			EntityNotFoundException ex = new EntityNotFoundException(Driver.class, "driverId", driverId.toString());
@@ -93,7 +98,7 @@ public class DriverServiceImpl implements DriverService {
 			d.setTruckId(driverRequest.getTruckId());
 		}
 
-		driverRepository.save(d);
+		driverRepositoryES.save(d);
 		log.info("Driver Data is updated");
 		driverResponse.setDriverId(driverId);
 		driverResponse.setStatus(Constants.updateSuccess);
@@ -111,7 +116,7 @@ public class DriverServiceImpl implements DriverService {
 
 		DriverResponse driverResponse = new DriverResponse();
 
-		Driver d = driverRepository.findById(driverId).orElse(null);
+		Driver d = driverRepositoryES.findById(driverId).orElse(null);
 
 		if (d == null) {
 			EntityNotFoundException ex = new EntityNotFoundException(Driver.class, "driverId", driverId.toString());
@@ -119,7 +124,7 @@ public class DriverServiceImpl implements DriverService {
 			throw ex;
 		}
 
-		driverRepository.delete(d);
+		driverRepositoryES.delete(d);
 		log.info("Deleted");
 		driverResponse.setStatus(Constants.deleteSuccess);
 		log.info("Deleted Service Response returned");
@@ -134,46 +139,46 @@ public class DriverServiceImpl implements DriverService {
 
 		if (transporterId != null && phoneNum == null && truckId == null) {
 			log.info("Driver Data with params returned");
-			return driverRepository.findByTransporterId(transporterId,
+			return driverRepositoryES.findByTransporterId(transporterId,
 					PageRequest.of(page.orElse(0), (int) Constants.pageSize));
 		}
 
 		if (phoneNum != null && truckId == null && transporterId == null) {
 			log.info("Driver Data with params returned");
-			return driverRepository.findByPhoneNum(phoneNum, PageRequest.of(page.orElse(0), (int) Constants.pageSize));
+			return driverRepositoryES.findByPhoneNum(phoneNum, PageRequest.of(page.orElse(0), (int) Constants.pageSize));
 		}
 
 		if (truckId != null && transporterId == null && phoneNum == null) {
 			log.info("Driver Data with params returned");
-			return driverRepository.findByTruckId(truckId, PageRequest.of(page.orElse(0), (int) Constants.pageSize));
+			return driverRepositoryES.findByTruckId(truckId, PageRequest.of(page.orElse(0), (int) Constants.pageSize));
 		}
 
 		if (transporterId != null && phoneNum != null && truckId == null) {
 			log.info("Driver Data with params returned");
-			return driverRepository.findByPhoneNumAndTransporterId(phoneNum, transporterId,
+			return driverRepositoryES.findByPhoneNumAndTransporterId(phoneNum, transporterId,
 					PageRequest.of(page.orElse(0), (int) Constants.pageSize));
 		}
 
 		if (transporterId != null && phoneNum == null && truckId != null) {
 			log.info("Driver Data with params returned");
-			return driverRepository.findByTruckIdAndTransporterId(truckId, transporterId,
+			return driverRepositoryES.findByTruckIdAndTransporterId(truckId, transporterId,
 					PageRequest.of(page.orElse(0), (int) Constants.pageSize));
 		}
 
 		if (transporterId == null && phoneNum != null && truckId != null) {
 			log.info("Driver Data with params returned");
-			return driverRepository.findByPhoneNumAndTruckId(phoneNum, truckId,
+			return driverRepositoryES.findByPhoneNumAndTruckId(phoneNum, truckId,
 					PageRequest.of(page.orElse(0), (int) Constants.pageSize));
 		}
 
 		if (transporterId != null && phoneNum != null && truckId != null) {
 			log.info("Driver Data with params returned");
-			return driverRepository.findByPhoneNumAndTransporterIdAndTruckId(phoneNum, transporterId,truckId,
+			return driverRepositoryES.findByPhoneNumAndTransporterIdAndTruckId(phoneNum, transporterId,truckId,
 					PageRequest.of(page.orElse(0), (int) Constants.pageSize));
 		}
 
 		log.info("Driver Data get all method called");
-		return driverRepository.findAllDrivers(PageRequest.of(page.orElse(0), (int) Constants.pageSize));
+		return driverRepositoryES.findAllDrivers(PageRequest.of(page.orElse(0), (int) Constants.pageSize));
 
 	}
 

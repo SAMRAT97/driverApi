@@ -88,12 +88,7 @@
 			<artifactId>minimal-json</artifactId>
 			<version>0.9.5</version>
 		</dependency>
-		<dependency>
-   			 <groupId>org.springframework.data</groupId>
-    			<artifactId>spring-data-elasticsearch</artifactId>
-  			  <version>4.0.0.RELEASE</version>
-		</dependency>
-		</dependencies>
+	</dependencies>
 
 	<build>
 		<plugins>
